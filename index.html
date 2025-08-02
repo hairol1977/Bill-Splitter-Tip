@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tip Calculator</title>
+  <style>
+    body {
+      font-family: Calibri, sans-serif;
+      background-color: #EBEAFF;
+      text-align: center;
+      padding: 30px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h2 {
+      font-family: 'Ink Free', cursive;
+      color: #4B0082;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-size: 1.2em;
+    }
+    input {
+      width: 20%;
+      padding: 8px;
+      font-size: 1em;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background-color: gold;
+      border: none;
+      cursor: pointer;
+    }
+    .result {
+      font-size: 20px;
+      margin-top: 20px;
+      color: purple;
+      white-space: pre-line;
+    }
+    img {
+      max-width: 100px;
+    }
+    .footer {
+      margin-top: 11px;
+      font-size: 0.9em;
+      font-style: italic;
+    }
+    h3 {
+      font-size: 18px;
+    }
+    #qrcode {
+      margin: 20px auto 0;
+      width: fit-content;
+    }
+    #qrcode canvas {
+      animation: fadeIn 0.5s ease-in-out;
+      transform: scale(0.8);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <h2><img src="tip.gif" alt="tip icon" style="vertical-align: middle;" /> Bill Splitter & Tip Calculator</h2>
+
+  <div>
+    <label>Total Bill 💲:</label>
+    <input id="bill" type="number" placeholder="Enter total bill amount" />
+
+    <label>Number of People 👥:</label>
+    <input id="people" type="number" placeholder="Enter number of people" />
+
+    <label>Tip Percentage 🤝:</label>
+    <input id="tip" type="number" placeholder="Enter tip percentage" />
+  </div>
+  <div><button onclick="calculateTip()">Calculate 💰</button></div>
+
+  <div style="height:20px;"></div>
+  <div class="container">
+    <div class="result" id="resultText">Result:</div>
+    <div id="qrcode">...</div>
+  </div>
+
+  <div><button onclick="clearInputs()">Clear ❌</button></div>
+
+  <div style="height:40px;"></div>
+  <footer class="mt-2" style="color:gray; font-style:italic; font-size:14px;">
+    @Koleksi77
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    function calculateTip() {
+      const bill = parseFloat(document.getElementById('bill').value);
+      const tip = parseInt(document.getElementById('tip').value);
+      const people = parseInt(document.getElementById('people').value);
+      const result = document.getElementById('resultText');
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = "";
+
+      if (isNaN(bill) || isNaN(tip) || isNaN(people) || people <= 0) {
+        alert("Please enter valid numbers.");
+        result.innerText = "Result:";
+        return;
+      }
+
+      const tipAmount = bill * (tip / 100);
+      const total = bill + tipAmount;
+      const perPerson = (total / people).toFixed(2);
+
+      const message = `Total bill: $${bill.toFixed(2)}
+Tip (${tip}%): $${tipAmount.toFixed(2)}
+Total with tip: $${total.toFixed(2)}
+Each person should pay: $${perPerson}`;
+      result.innerText = message;
+
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.lang = "en-US";
+      utterance.rate = 1;
+      speechSynthesis.speak(utterance);
+
+      new QRCode(qrContainer, {
+        text: `Each person pays: $${perPerson}`,
+        width: 150,
+        height: 150,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    function clearInputs() {
+      document.getElementById('bill').value = "";
+      document.getElementById('people').value = "";
+      document.getElementById('tip').value = "";
+      document.getElementById('resultText').innerText = "Result:";
+      document.getElementById('qrcode').innerHTML = "...";
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+      }
+    }
+  </script>
+</body>
+</html>
